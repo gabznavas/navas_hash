@@ -2,7 +2,6 @@ import random
 
 BITS_32 = 0xFFFFFFFF
 BITS_64 = 0xFFFFFFFFFFFFFFFF
-MIN_DATA_LEN = 4
 
 fmt = {
     '8': "{:08x}",
@@ -10,19 +9,28 @@ fmt = {
 }
 
 class SimpleHash:
-    def execute(self, data: bytes, mask = BITS_32, fmt = fmt['8']) -> str:
-        # estado interno com 4 palavras
-        words = [0xFFFFFFFF] * 4
+    MIN_DATA_LEN = 4
 
-        # garante tamanho mínimo
+    def make_internal_state(self):
+        return [0xFFFFFFFF] * 4
+
+    def assure_min_length(self, data: bytes) -> bytes:
         total_len = len(data)
-        if total_len < MIN_DATA_LEN:
-            data = data + b'\x00' * (MIN_DATA_LEN - total_len)
+        if total_len < self.MIN_DATA_LEN:
+            data = data + b'\x00' * (self.MIN_DATA_LEN - total_len)
+        return data
 
-        # divide em 4 partes
+    def split_parts(self, data: bytes) -> [bytes]:
         n = len(data) // 4
         parts = [data[i:i+n] for i in range(0, len(data), n)]
+        return parts
 
+
+    def execute(self, data: bytes, mask = BITS_32, fmt = fmt['8']) -> str:
+        words = self.make_internal_state()
+        data = self.assure_min_length(data)
+        parts = self.split_parts(data)
+    
         # processa cada palavra
         for index in range(4):
             part = 0
