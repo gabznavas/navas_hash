@@ -25,9 +25,14 @@ class SimpleHash:
         parts = [data[i:i+n] for i in range(0, len(data), n)]
         return parts
 
-    def rotate(self, part: int) -> int:
-        return ((part << 5) | (part >> 3))
+    def rotate(self, data: int) -> int:
+        return ((data << 5) | (data >> 3))
 
+    def add_mask(self, data: int, mask = BITS_32):
+        return data & mask
+
+    def make_hash(self, words: [int], fmt: str) -> str:
+        return ''.join(fmt.format(w) for w in words)
 
     def execute(self, data: bytes, mask = BITS_32, fmt = fmt['8']) -> str:
         words = self.make_internal_state()
@@ -42,12 +47,9 @@ class SimpleHash:
 
             rotated = self.rotate(part)
 
-            # aplica máscara (define número de bits)
-            words[index] = rotated & mask
+            words[index] = self.add_mask(rotated, mask)
 
-        # monta hash em string
-        hash_out = ''.join(fmt.format(w) for w in words)
-        return hash_out
+        return self.make_hash(words, fmt)
 
 
 s = 'navas.dev'
