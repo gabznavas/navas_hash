@@ -25,6 +25,9 @@ class SimpleHash:
         parts = [data[i:i+n] for i in range(0, len(data), n)]
         return parts
 
+    def rotate(self, part: int) -> int:
+        return ((part << 5) | (part >> 3))
+
 
     def execute(self, data: bytes, mask = BITS_32, fmt = fmt['8']) -> str:
         words = self.make_internal_state()
@@ -37,8 +40,7 @@ class SimpleHash:
             for b in parts[index]:
                 part += (b << 5)
 
-            # rotação
-            rotated = ((part << 5) | (part >> 3))
+            rotated = self.rotate(part)
 
             # aplica máscara (define número de bits)
             words[index] = rotated & mask
